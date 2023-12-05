@@ -66,12 +66,14 @@ def is_valid_part(part: Part) -> bool:
     return any((is_adjacent_to_symbol(Point(x=x, y=part.y)) for x in range(part.x_first, part.x_last+1)))
 
 parts = [p for p in part_candidates if is_valid_part(p)]
-#print(parts)
 
 def get_part_number(part: Part) -> int:
     return int((lines[part.y])[part.x_first:part.x_last+1])
 
-#print(sum([get_part_number(p) for p in parts]))
+def is_part_adjecent_to_point(part: Part, point: Point) -> bool:
+    if part.y - point.y > 1 or part.y - point.y < -1: # not necessary, just a quick check to speed things up
+        return False
+    return any((are_neighbors(point, neigh_point) for neigh_point in [Point(x=x, y=part.y) for x in range(part.x_first, part.x_last+1)]))
 
 gear_ratios_sum = 0
 for y in range(len(lines)):
@@ -80,7 +82,7 @@ for y in range(len(lines)):
         char = line[x]        
         if char == "*":
             gear_point = Point(x=x, y=y)
-            adjacent_parts = [part for part in parts if any((are_neighbors(gear_point, neigh_point) for neigh_point in [Point(x=x, y=part.y) for x in range(part.x_first, part.x_last+1)]))]
+            adjacent_parts = [part for part in parts if is_part_adjecent_to_point(part=part, point=gear_point)]
             if len(adjacent_parts) == 2:
                 gear_ratio = get_part_number(adjacent_parts[0]) * get_part_number(adjacent_parts[1])
                 print("gear at ", x, y, gear_ratio)
