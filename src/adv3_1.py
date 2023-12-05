@@ -30,13 +30,9 @@ for y in range(len(lines)):
             elif x == (len(line) - 1):
                 part_candidates.append(Part(y=y, x_first=x_first, x_last=x))
                 part_found = False
-                print("zzz", y, x_first, x)
         elif not part_found and char.isnumeric():
             x_first = x
             part_found = True
-
-#print(part_candidates)
-
 
 def is_in_bounds(cell: Point, max_x: int, max_y: int) -> bool:
     return cell.x >= 0 and cell.x <= max_x and cell.y >=0 and cell.y <= max_y
@@ -73,4 +69,3 @@ def get_part_number(part: Part) -> int:
     return int((lines[part.y])[part.x_first:part.x_last+1])
 
 print(sum([get_part_number(p) for p in parts]))
-#print([(lines[part.y])[part.x_first:part.x_last+1] for part in parts])
