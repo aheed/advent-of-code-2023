@@ -30,20 +30,10 @@ def line_to_game(line: str) -> Game:
 all_games = [line_to_game(line) for line in lines]
 
 def max_needed(color:str, game: Game) -> int:
-    subgames = [subgame for subgame in game.subgames]
-    maxes = [subgame.get(color, 0) for subgame in subgames]
-    return max(maxes)
+    return max([subgame.get(color, 0) for subgame in game.subgames])
 
-    #[max_needed(key) for key in color_keys]
 def game_power(game: Game) -> int:
-    #return math.mul([m_n[key] for key in m_n := max_needed(subgame).keys])
     return math.prod([max_needed(color=color, game=game) for color in color_keys])
 
 game_powers = [game_power(game) for game in all_games]
-print(game_powers)
 print(sum(game_powers))
-#possible_games = [game for game in all_games if all((subgame_is_possible(subgame) for subgame in game.subgames))]
-#possible_game_ids = [game.id for game in possible_games]
-#print(sum(possible_game_ids))
-
-
