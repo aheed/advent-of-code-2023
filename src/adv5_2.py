@@ -46,13 +46,10 @@ def seed_to_max_increment(seed: int, maps: list[Map]):
     return ret
 
 def seed_range_to_min_location(range_start: int, range_length: int, maps: list[Map]):
-    #locations = [seed_to_location(seed=seed, maps=maps) for seed in range(range_start, range_start + range_length)] 
-    #return min((seed_to_location(seed=seed, maps=maps) for seed in range(range_start, range_start + range_length)))
     min_location = big_number
     candidate_seed = range_start
     while candidate_seed < range_start + range_length:
         min_location = min(min_location, seed_to_location(seed=candidate_seed, maps=maps))
-        #candidate_seed = candidate_seed + 1 #temp
         candidate_seed = candidate_seed + seed_to_max_increment(seed=candidate_seed, maps=maps)
     return min_location
 
@@ -66,27 +63,20 @@ map_index = -1
 for line in lines:
     if "seeds:" in line:
         seeds = [int(s) for s in line.split(": ")[1].split(" ")]
-        #print(seeds)
         continue
 
     if ":" in line:
         map_index = map_index + 1
         maps.append(Map(ranges=[]))
-        #print("new map", line)
         continue
 
     if len(line) == 0:
-        #print("empty line")
         continue
 
     numbers = [int(n) for n in line.split(" ")]
     new_range = MapRange(dst_start=numbers[0], src_start=numbers[1], length=numbers[2])
     maps[map_index].ranges.append(new_range)
 
-#print(maps)
-#locations = [seed_to_location(seed=seed, maps=maps) for seed in seeds]
-#print(min(locations))
-print(seed_range_to_min_location(range_start=seeds[0], range_length=seeds[1], maps=maps))
 m = [seed_range_to_min_location(range_start=seeds[i], range_length=seeds[i+1], maps=maps) for i in range(0, len(seeds), 2)]
-print(m)
+#print(m)
 print(min(m))
