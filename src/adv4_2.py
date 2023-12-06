@@ -16,13 +16,6 @@ def card_matches(line: str) -> int:
     #print(win_set, my_set, win_set.intersection(my_set))
     return len(win_set.intersection(my_set))
 
-#def card_score(line: str) -> int:
-#    nof_matching = card_matches(line)
-#    return pow(base=2, exp=nof_matching-1) if nof_matching > 0 else 0
-    
-#print([card_score(line) for line in lines]) #temp
-#print(sum([card_score(line) for line in lines]))
-
 multiplyers = [1 for _ in lines]
 
 for i in range(len(lines)):
@@ -30,5 +23,5 @@ for i in range(len(lines)):
     matches = card_matches(lines[i])
     for j in range(i+1, i + matches + 1):
         multiplyers[j] = multiplyers[j] + m
-print(multiplyers)
+
 print(sum(multiplyers))
