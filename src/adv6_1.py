@@ -18,10 +18,10 @@ def get_numbers(line: str) -> list[int]:
 times = get_numbers(lines[0])
 distances = get_numbers(lines[1])
 
-print(times)
-print(distances)
+#print(times)
+#print(distances)
 races = [Race(time=times[i], distance=distances[i]) for i in range(len(times))]
-print(races)
+#print(races)
 
 def ways_to_win_race(race: Race) -> int:
     wins = 0
@@ -33,6 +33,3 @@ def ways_to_win_race(race: Race) -> int:
     return wins
 
 print(math.prod([ways_to_win_race(race=race) for race in races]))
-#print()
-#races = [Race]
-
