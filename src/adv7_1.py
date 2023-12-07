@@ -45,10 +45,9 @@ with utils.get_in_file() as infile:
 
 split_lines = [line.split(" ") for line in lines]
 hands = [Hand(cards=words[0], bid=int(words[1])) for words in split_lines]
-print(hands)
 
 ranked_hands = sorted(hands, key=cmp_to_key(compare_hands), reverse=True)
-print(ranked_hands)
+#print(ranked_hands)
 
 hand_sum = 0
 for i in range(len(ranked_hands)):
