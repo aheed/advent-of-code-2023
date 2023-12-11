@@ -25,27 +25,21 @@ for x in range(nof_columns):
 
 def calc_extra_rows(line: str) -> int:
     return 0 if any((c=="#" for c in line)) else 1
-    #return 0
 
 def calc_extra_columns(x: int) -> int:
     return 0 if any((lines[y][x] =="#" for y in range(nof_lines))) else 1
-    #return 0
 
 row_thickness = [calc_extra_rows(line=line) + 1 for line in lines]
 column_thickness = [calc_extra_columns(x=x) +1 for x in range(nof_columns)]
-print(row_thickness)
-print(column_thickness)
+#print(row_thickness)
+#print(column_thickness)
 
 pairs: list[list[Galaxy]] = []
-#for i in range((len(galaxies)+1)//2):
 for i in range(len(galaxies)):
     for j in range(i+1, len(galaxies)):
         pairs.append([galaxies[i], galaxies[j]])
 
-#print(pairs, len(pairs))
-
 def calc_shortest_path(pair: list[Galaxy]) -> int:
-    #return abs(pair[0].x - pair[1].x) + abs(pair[0].y - pair[1].y)
     min_x = min(pair[0].x, pair[1].x)
     max_x = max(pair[0].x, pair[1].x)
     x_distance = 0
