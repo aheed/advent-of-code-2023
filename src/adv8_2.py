@@ -11,16 +11,17 @@ def get_triple(line: str) -> list[str]:
 triples = [get_triple(line) for line in lines[2:]]
 map = {t[0]: t[1:] for t in triples}
 
-print(map)
+#print(map)
 
 total_cnt = 0
 in_index = 0
-current_node = "AAA"
+current_nodes = [t[0] for t in triples if t[0][2] == "A"]
 
-while current_node != "ZZZ":
-    current_node = map[current_node][0 if lines[0][in_index] == "L" else 1]
+while not all((node[2] == "Z" for node in current_nodes)):
+    #print(current_nodes)
+    current_nodes = [ map[node][0 if lines[0][in_index] == "L" else 1] for node in current_nodes]
     in_index = (in_index + 1) % len(lines[0])
     total_cnt = total_cnt + 1
 
-print(in_index)
+#print(in_index)
 print(total_cnt)
