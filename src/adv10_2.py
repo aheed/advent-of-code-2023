@@ -19,8 +19,8 @@ while True:
         break
     y_s = y_s + 1
 
-print(x_s,y_s)
-print(lines[y_s][x_s])
+#print(x_s,y_s)
+#print(lines[y_s][x_s])
 
 tiles[y_s][x_s] = TileStatus.PATH
 found = False
@@ -58,7 +58,7 @@ while not (x == x_s and y == y_s):
     c = lines[y][x]
     tiles[y][x] = TileStatus.PATH
 
-    print(cnt, x, y, c, direction, orientation)
+    #print(cnt, x, y, c, direction, orientation)
 
     if direction == "e":
         if c == "-":
@@ -179,32 +179,13 @@ while not (x == x_s and y == y_s):
    
     cnt = cnt + 1
 
-print("---")
-print(cnt, x, y, c, direction, orientation)
-print(cnt)
-print(cnt // 2)
-
-# 2-dim grid of tiles
-# tile status can be unknown, path, inside, outside
-# iterate path: all neighbors on the right side are inside, neighbors on the left are outside
-# iterate all tiles: if there is any unknown tile, check if any of it's neighbors is outside or inside
-#  repeat until no more unknown tiles
-
-
-
-print(tiles)
-for tl in tiles:
-    print("".join([f"{tile.value}" for tile in tl]))
-
 dirty = True
 while dirty:
-    print("floodfilling")
     unknown_cnt = 0
     for x in range(len(tiles[0])):
         for y in range(len(tiles)):
             if tiles[y][x] == TileStatus.UNKNOWN:
                 unknown_cnt = unknown_cnt + 1
-                print(x,y)
                 if x > 0:
                     neighbor_status = tiles[y][x-1]
                     if neighbor_status == TileStatus.INSIDE or neighbor_status == TileStatus.OUTSIDE:
@@ -222,10 +203,5 @@ while dirty:
                     if neighbor_status == TileStatus.INSIDE or neighbor_status == TileStatus.OUTSIDE:
                         tiles[y][x] = neighbor_status
     dirty = unknown_cnt > 0
-    #dirty = False #temp
-
-print(tiles)
-for tl in tiles:
-    print("".join([f"{tile.value}" for tile in tl]))
 
 print(sum([sum([1 if tile == TileStatus.INSIDE else 0 for tile in tl]) for tl in tiles]))
