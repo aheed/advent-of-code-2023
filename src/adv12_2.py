@@ -4,6 +4,9 @@ import utils
 with utils.get_in_file() as infile:
     lines = [line.strip() for line in infile]
 
+evaluate_cnt = 0
+cache: dict[str, int] = {}
+
 #unknowns = [sum((1 for c in line if c == "?")) for line in lines]
 #print(unknowns)
 #print(max(unknowns))
@@ -34,6 +37,14 @@ def group_fits_at(row: list[Status], pos:int, group: int) -> bool:
 def calc_nof_arrangements(row: list[Status], groups: list[int]) -> int:
     #if len(row) == 0:
     #    return 0
+
+    global evaluate_cnt
+    global cache
+    evaluate_cnt = evaluate_cnt + 1
+
+    key = "a".join([str(c) for c in row]) + "b" + "c".join([str(n) for n in groups])
+    if (r := cache.get(key)) != None:
+        return r
     
     if len(groups) == 0:
         return 0 if Status.YES in row else 1
@@ -47,6 +58,7 @@ def calc_nof_arrangements(row: list[Status], groups: list[int]) -> int:
     #print(group0_positions)
     arrs = [calc_nof_arrangements(row=row[i + groups[0]+1:], groups=groups[1:]) for i in group0_positions]
     ret = sum(arrs)
+    cache[key] = ret
     return ret
 
 def char_to_status(c: str) -> Status:
@@ -82,11 +94,9 @@ rows_and_groups = [line_to_row_and_groups(line=line) for line in lines]
 result = [calc_nof_arrangements(row=r_n_g[0], groups=r_n_g[1]) for r_n_g in rows_and_groups]
 print(result)
 print(sum(result))
-
+print(evaluate_cnt)
 #test = line_to_row_and_groups("???? 2,1")
 #print(calc_nof_arrangements(row=test[0], groups=test[1]))
 
-# 9241 is too high
-# 6434 is too low
-# 7735 is wrong
+# 25470469720346 is too high
 
