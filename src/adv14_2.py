@@ -37,7 +37,6 @@ def column_score(column: str) -> int:
 def rotate_cw(columns: list[str]) -> list[str]:
     row_indexes = [row_index for row_index in range(len(columns)-1, -1, -1)]
     return ["".join([columns[column_index][row_index] for column_index in range(len(columns[0])) ]) for row_index in row_indexes]
-    #return ["".join([columns[row_index][column_index] for column_index in range(len(columns[0])) ]) for row_index in range(len(columns), 0, -1)]
 
 def get_cache_key(columns: list[str]) -> str:
     return "z".join(columns)
@@ -53,7 +52,7 @@ def cycle_columns(columns: list[str]) -> list[str]:
     return ret
 
 columns = [get_column(pattern=lines, pos=p) for p in range(len(lines[0]))]
-print(columns)
+#print(columns)
 
 cache: dict[str, int] = {}
 iteration = 0
@@ -66,7 +65,7 @@ while True:
         break
     cache[key] = iteration
     iteration = iteration + 1
-print(iteration, cycle_length)
+#print(iteration, cycle_length)
 
 extra_cycles = ((1000000000-1) - (iteration - cycle_length)) % cycle_length
 for _ in range(extra_cycles):
@@ -74,19 +73,3 @@ for _ in range(extra_cycles):
 
 column_scores = [column_score(column=column) for column in columns]
 print(sum(column_scores))
-
-#columns = cycle_columns(columns=columns)
-#print(columns)
-
-#columns = rotate_cw(columns=columns)
-#print(columns)
-#columns = rotate_cw(columns=columns)
-#columns = rotate_cw(columns=columns)
-#columns = rotate_cw(columns=columns)
-#print(columns)
-
-#print(tilt_column(column=columns[0]))
-#tilted_columns = [tilt_column(column=column) for column in columns]
-#print(tilted_columns)
-#column_scores = [column_score(column=column) for column in tilted_columns]
-#print(sum(column_scores))
