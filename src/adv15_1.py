@@ -4,7 +4,7 @@ with utils.get_in_file() as infile:
     lines = [line.strip() for line in infile]
 
 steps = lines[0].split(",")
-print(steps[0], steps[-1])
+#print(steps[0], steps[-1])
 
 def hash(in_str: str) -> int:
     h = 0

@@ -44,7 +44,7 @@ for step in steps:
         else:
             boxes[box_index].append(Lens(label=label, focal_length=focal_length))
 
-print(boxes)
+#print(boxes)
 
 #box_powers = [sum(((box_index+1) * (lens_index+1) * boxes[box_index][lens_index].focal_length for lens_index in range(len(boxes[box_index])))) for box_index in range(len(boxes))]
 #print(box_powers)
