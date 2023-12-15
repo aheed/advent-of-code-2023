@@ -39,16 +39,51 @@ def rotate_cw(columns: list[str]) -> list[str]:
     return ["".join([columns[column_index][row_index] for column_index in range(len(columns[0])) ]) for row_index in row_indexes]
     #return ["".join([columns[row_index][column_index] for column_index in range(len(columns[0])) ]) for row_index in range(len(columns), 0, -1)]
 
+def get_cache_key(columns: list[str]) -> str:
+    return "z".join(columns)
+
+def tilt_columns(columns: list[str]) -> list[str]:
+    return [tilt_column(column=column) for column in columns]
+
+def cycle_columns(columns: list[str]) -> list[str]:
+    ret = columns
+    for _ in range(4):
+        ret = tilt_columns(columns=ret)
+        ret = rotate_cw(columns=ret)
+    return ret
+
 columns = [get_column(pattern=lines, pos=p) for p in range(len(lines[0]))]
 print(columns)
 
-columns = rotate_cw(columns=columns)
-print(columns)
+cache: dict[str, int] = {}
+iteration = 0
+cycle_length = 0 #will be overwritten
+while True:
+    columns = cycle_columns(columns=columns)
+    key = get_cache_key(columns=columns)
+    if key in cache:
+        cycle_length = iteration - cache[key]
+        break
+    cache[key] = iteration
+    iteration = iteration + 1
+print(iteration, cycle_length)
 
-columns = rotate_cw(columns=columns)
-columns = rotate_cw(columns=columns)
-columns = rotate_cw(columns=columns)
-print(columns)
+extra_cycles = ((1000000000-1) - (iteration - cycle_length)) % cycle_length
+for _ in range(extra_cycles):
+    columns = cycle_columns(columns=columns)
+
+column_scores = [column_score(column=column) for column in columns]
+print(sum(column_scores))
+
+#columns = cycle_columns(columns=columns)
+#print(columns)
+
+#columns = rotate_cw(columns=columns)
+#print(columns)
+#columns = rotate_cw(columns=columns)
+#columns = rotate_cw(columns=columns)
+#columns = rotate_cw(columns=columns)
+#print(columns)
 
 #print(tilt_column(column=columns[0]))
 #tilted_columns = [tilt_column(column=column) for column in columns]
