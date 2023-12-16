@@ -4,10 +4,9 @@ with utils.get_in_file() as infile:
     lines = [line.strip() for line in infile]
 
 grid = [[c for c in line] for line in lines]
-print(grid)
+#print(grid)
 
 beam_cnts = [[0 for _ in row] for row in grid]
-#print(beam_cnts)
 
 cache: dict[str, int] = {}
 
@@ -89,7 +88,7 @@ def traverse_grid(direction: str, x: int, y:int):
                 assert(False)
 
 traverse_grid(direction="e", x = 0, y=0)
-print(beam_cnts)
+#print(beam_cnts)
 
 s = sum((sum((1 for cnt in row if cnt > 0 )) for row in beam_cnts))
 print(s)

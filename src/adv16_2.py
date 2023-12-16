@@ -7,7 +7,6 @@ grid = [[c for c in line] for line in lines]
 #print(grid)
 
 beam_cnts = [[0 for _ in row] for row in grid]
-#print(beam_cnts)
 
 cache: dict[str, int] = {}
 
@@ -88,8 +87,6 @@ def traverse_grid(direction: str, x: int, y:int):
             case _:
                 assert(False)
 
-###
-
 def calc_sum() -> int:
     return sum((sum((1 for cnt in row if cnt > 0 )) for row in beam_cnts))
 
@@ -100,35 +97,24 @@ def reset():
     cache = {}
 
 max_sum = 0
-#for direction in ["e", "w"]:
 for y in range(len(grid)):        
     reset()
     traverse_grid(direction="e", x=0, y=y)
-    s = calc_sum()
-    max_sum = max(max_sum, s)
+    max_sum = max(max_sum, calc_sum())
 
 for y in range(len(grid)):
     reset()
     traverse_grid(direction="w", x=len(grid[0])-1, y=y)
-    s = calc_sum()
-    max_sum = max(max_sum, s)
+    max_sum = max(max_sum, calc_sum())
 
 for x in range(len(grid[0])):
     reset()
     traverse_grid(direction="s", x=x, y=0)
-    s = calc_sum()
-    max_sum = max(max_sum, s)
+    max_sum = max(max_sum, calc_sum())
 
 for x in range(len(grid[0])):
     reset()
     traverse_grid(direction="n", x=x, y=len(grid)-1)
-    s = calc_sum()
-    max_sum = max(max_sum, s)
+    max_sum = max(max_sum, calc_sum())
 
 print(max_sum)
-
-###
-#traverse_grid(direction="e", x = 0, y=0)
-#print(beam_cnts)
-#s = sum((sum((1 for cnt in row if cnt > 0 )) for row in beam_cnts))
-#print(s)
