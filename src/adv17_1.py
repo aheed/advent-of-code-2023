@@ -64,11 +64,13 @@ def get_neighbors(id: NodeId) -> list[NodeId]:
     #    ret.append(replace(id, steps_forward=3))
     #if id.steps_forward < 2:
     #    ret.append(replace(id, steps_forward=2))
-    for direction in ["n", "s", "e", "w"]:
-        for steps_forward in range(1, 4):
-            #id = NodeId(x=id.x, y=id.y, direction=direction, steps_forward=steps_forward)
-            #ret.append(id)
-            ret.append(replace(id, direction=direction, steps_forward=steps_forward))
+            
+    #for direction in ["n", "s", "e", "w"]:
+    #    for steps_forward in range(1, 4):
+    #        #id = NodeId(x=id.x, y=id.y, direction=direction, steps_forward=steps_forward)
+    #        #ret.append(id)
+    #        ret.append(replace(id, direction=direction, steps_forward=steps_forward))
+
     ret = [n_id for n_id in ret if not (n_id.direction == id.direction and n_id.steps_forward <= id.steps_forward)]
 
     return [n for n in ret if (n.steps_forward <= 3) and not (n.x < 0 or n.x > len(grid[0])-1 or n.y < 0 or n.y > len(grid)-1)]
@@ -85,8 +87,12 @@ for x in range(len(grid[0])):
                 id = NodeId(x=x, y=y, direction=direction, steps_forward=steps_forward)
                 nodes[id] = Node(visited=False, best=bad_heat_loss, heat_loss=grid[y][x])
 
+#print(nodes)
+print(len(nodes.keys()))
+
 current_id = initial_id
 
+progress = 0
 while True:
     neigh_ids = get_neighbors(id=current_id)
     for neigh_id in neigh_ids:
@@ -96,6 +102,9 @@ while True:
             cost = 0 if (current_id.x == neigh_id.x and current_id.y == neigh_id.y) else nodes[neigh_id].heat_loss 
             nodes[neigh_id].best = min(nodes[neigh_id].best, cost + nodes[current_id].best)
     nodes[current_id].visited = True
+    progress = progress + 1
+    if progress % 1000 == 0:
+        print("progress: ", progress)
 
     lowest_unvisited_best = bad_heat_loss
     lowest_unvisited_id = None
@@ -118,10 +127,6 @@ while True:
     if current_id in dbg:
         print([nodes[n] for n in dbg])
         print("...")
-
-
-print(nodes)
-print(len(nodes))
 
 #end_node = next((n for n in nodes if n.position == Position(x=len(grid[0])-1, y=len(grid)-1)))
 end_nodes = [nodes[id] for id in nodes.keys() if id.x == len(grid[0])-1 and id.y == len(grid)-1]
