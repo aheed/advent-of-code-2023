@@ -10,8 +10,6 @@ class NodeId:
 
 @dataclass
 class Node:
-    #id: NodeId
-    visited: bool
     best: int
     heat_loss: int
 
@@ -24,8 +22,6 @@ grid[0][0] = 0
 bad_heat_loss = 1000000000
 
 def get_neighbors(id: NodeId) -> list[NodeId]:
-    #if False:
-    #    pass
     if id.steps_forward < 4:
         # special case for the start block
         assert(id.steps_forward == 0)
@@ -63,11 +59,12 @@ def get_neighbors(id: NodeId) -> list[NodeId]:
             case _:
                 assert(False)
 
-    return [n for n in ret if (n.steps_forward <= 3) and not (n.x < 0 or n.x > len(grid[0])-1 or n.y < 0 or n.y > len(grid)-1 or n.steps_forward > 10)]
+    return [n for n in ret if (n.steps_forward <= 10) and not (n.x < 0 or n.x > len(grid[0])-1 or n.y < 0 or n.y > len(grid)-1)]
 
 initial_id = NodeId(x=0, y=0, direction="e", steps_forward=0)
 
-nodes: dict[NodeId, Node] = {initial_id : Node(visited=False, best=0, heat_loss=0)}
+unvisited_nodes: dict[NodeId, Node] = {initial_id : Node(best=0, heat_loss=0)}
+visited_nodes: dict[NodeId, Node] = {}
 
 current_id = initial_id
 
@@ -75,11 +72,11 @@ progress = 0
 while True:
     neigh_ids = get_neighbors(id=current_id)
     for neigh_id in neigh_ids:
-        if not neigh_id in nodes:
-            nodes[neigh_id] = Node(visited=False, best=bad_heat_loss, heat_loss=grid[neigh_id.y][neigh_id.x])
-        if not nodes[neigh_id].visited:
+        if not neigh_id in visited_nodes:
+            if not neigh_id in unvisited_nodes:
+                unvisited_nodes[neigh_id] = Node(best=bad_heat_loss, heat_loss=grid[neigh_id.y][neigh_id.x])
+
             cost = 0
-            #cost = 0 if (current_id.x == neigh_id.x and current_id.y == neigh_id.y) else nodes[neigh_id].heat_loss            
             if current_id.x != neigh_id.x:
                 step = -1 if neigh_id.x > current_id.x else 1
                 x = neigh_id.x
@@ -93,25 +90,22 @@ while True:
                     cost = cost + grid[y][neigh_id.x]
                     y = y + step
 
-            nodes[neigh_id].best = min(nodes[neigh_id].best, cost + nodes[current_id].best)
-    nodes[current_id].visited = True
+            unvisited_nodes[neigh_id].best = min(unvisited_nodes[neigh_id].best, cost + unvisited_nodes[current_id].best)
+    
+    visited_nodes[current_id] = unvisited_nodes[current_id]
+    unvisited_nodes.pop(current_id)
+    
     progress = progress + 1
     if progress % 1000 == 0:
         print("progress: ", progress)
 
-    lowest_unvisited_best = bad_heat_loss
-    lowest_unvisited_id = None
-    for id in nodes.keys():
-        if (not nodes[id].visited) and nodes[id].best < lowest_unvisited_best:
-            lowest_unvisited_id = id
-            lowest_unvisited_best = nodes[id].best
-    if lowest_unvisited_id is None:
+    if len(unvisited_nodes) == 0:
         break
+
+    lowest_unvisited_id, _ = min(unvisited_nodes.items(), key=lambda n: n[1].best)
     current_id = lowest_unvisited_id
 
-end_nodes = [nodes[id] for id in nodes.keys() if id.x == len(grid[0])-1 and id.y == len(grid)-1]
-#print(end_nodes)
+end_nodes = [visited_nodes[id] for id in visited_nodes.keys() if id.x == len(grid[0])-1 and id.y == len(grid)-1]
 end_nodes_best = [n.best for n in end_nodes]
-#print(end_nodes_best)
 print(min(end_nodes_best))
 
