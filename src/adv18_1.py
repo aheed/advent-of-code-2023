@@ -88,7 +88,8 @@ for instr in instructions:
                 case _:
                     assert(False)
             x = x + 1
-            for _ in range(instr.distance-1):                
+            for _ in range(instr.distance-1):
+                tiles[y][x] = TileStatus.PATH
                 if y > 0:
                     if tiles[y-1][x] == TileStatus.UNKNOWN:
                         tiles[y-1][x] = TileStatus.OUTSIDE
@@ -115,7 +116,8 @@ for instr in instructions:
                 case _:
                     assert(False)
             x = x - 1
-            for _ in range(instr.distance-1):                
+            for _ in range(instr.distance-1):
+                tiles[y][x] = TileStatus.PATH                
                 if y > 0:
                     if tiles[y-1][x] == TileStatus.UNKNOWN:
                         tiles[y-1][x] = TileStatus.INSIDE
@@ -142,7 +144,8 @@ for instr in instructions:
                 case _:
                     assert(False)
             y = y + 1
-            for _ in range(instr.distance-1):                
+            for _ in range(instr.distance-1):
+                tiles[y][x] = TileStatus.PATH                
                 if x < (len(tiles[0])-1):
                     if tiles[y][x+1] == TileStatus.UNKNOWN:
                         tiles[y][x+1] = TileStatus.OUTSIDE
@@ -169,7 +172,8 @@ for instr in instructions:
                 case _:
                     assert(False)
             y = y - 1
-            for _ in range(instr.distance-1):                
+            for _ in range(instr.distance-1):
+                tiles[y][x] = TileStatus.PATH                
                 if x < (len(tiles[0])-1):
                     if tiles[y][x+1] == TileStatus.UNKNOWN:
                         tiles[y][x+1] = TileStatus.INSIDE
@@ -184,4 +188,55 @@ for instr in instructions:
 assert(x==0)
 assert(y==0)
 
-print(sum([sum([1 if tile == TileStatus.PATH else 0 for tile in tl]) for tl in tiles]))
+def status_to_char(status: TileStatus) -> str:
+    match status:
+        case TileStatus.UNKNOWN:
+            return "?"
+        case TileStatus.PATH:
+            return "#"
+        case TileStatus.INSIDE:
+            return "I"
+        case TileStatus.OUTSIDE:
+            return "O"
+        
+def print_tiles():
+    global tiles
+    for row in tiles:
+        print("".join([status_to_char(s) for s in row]))
+
+print_tiles()
+print("------")
+
+dirty = True
+while dirty:
+    dirty = False
+    for x in range(len(tiles[0])):
+        for y in range(len(tiles)):
+            if tiles[y][x] == TileStatus.UNKNOWN:
+                dirty = True
+                if x > 0:
+                    neighbor_status = tiles[y][x-1]
+                    if neighbor_status == TileStatus.INSIDE or neighbor_status == TileStatus.OUTSIDE:
+                        tiles[y][x] = neighbor_status
+                if y > 0:
+                    neighbor_status = tiles[y-1][x]
+                    if neighbor_status == TileStatus.INSIDE or neighbor_status == TileStatus.OUTSIDE:
+                        tiles[y][x] = neighbor_status
+                if x < len(tiles[0])-1:
+                    neighbor_status = tiles[y][x+1]
+                    if neighbor_status == TileStatus.INSIDE or neighbor_status == TileStatus.OUTSIDE:
+                        tiles[y][x] = neighbor_status
+                if y < len(tiles)-1:
+                    neighbor_status = tiles[y+1][x]
+                    if neighbor_status == TileStatus.INSIDE or neighbor_status == TileStatus.OUTSIDE:
+                        tiles[y][x] = neighbor_status
+
+print_tiles()
+
+nof_path_tiles = sum([sum([1 if tile == TileStatus.PATH else 0 for tile in tl]) for tl in tiles])
+print(nof_path_tiles)
+nof_inside_tiles = sum([sum([1 if tile == TileStatus.INSIDE else 0 for tile in tl]) for tl in tiles])
+print(nof_inside_tiles)
+nof_outside_tiles = sum([sum([1 if tile == TileStatus.OUTSIDE else 0 for tile in tl]) for tl in tiles])
+print(nof_outside_tiles)
+print(nof_path_tiles + nof_inside_tiles)
