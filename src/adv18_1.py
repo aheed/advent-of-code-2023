@@ -65,16 +65,123 @@ print(len(tiles[0]))
 
 x=0
 y=0
+last_direction = "U"
 for instr in instructions:
+    tiles[y][x] = TileStatus.PATH
     match instr.direction:
         case "R":
-            x = x + instr.distance
+            match last_direction:
+                case "D":
+                    if x > 0:
+                        if tiles[y][x-1] == TileStatus.UNKNOWN:
+                            tiles[y][x-1] = TileStatus.INSIDE
+                    if y < (len(tiles)-1):
+                        if tiles[y+1][x] == TileStatus.UNKNOWN:
+                            tiles[y+1][x] = TileStatus.INSIDE
+                case "U":
+                    if x > 0:
+                        if tiles[y][x-1] == TileStatus.UNKNOWN:
+                            tiles[y][x-1] = TileStatus.OUTSIDE
+                    if y > 0:
+                        if tiles[y-1][x] == TileStatus.UNKNOWN:
+                            tiles[y-1][x] = TileStatus.OUTSIDE
+                case _:
+                    assert(False)
+            x = x + 1
+            for _ in range(instr.distance-1):                
+                if y > 0:
+                    if tiles[y-1][x] == TileStatus.UNKNOWN:
+                        tiles[y-1][x] = TileStatus.OUTSIDE
+                if y < (len(tiles)-1):
+                    if tiles[y+1][x] == TileStatus.UNKNOWN:
+                        tiles[y+1][x] = TileStatus.INSIDE
+                x = x + 1
         case "L":
-            x = x - instr.distance
+            match last_direction:
+                case "D":
+                    if x < (len(tiles[0])-1):
+                        if tiles[y][x+1] == TileStatus.UNKNOWN:
+                            tiles[y][x+1] = TileStatus.OUTSIDE
+                    if y < (len(tiles)-1):
+                        if tiles[y+1][x] == TileStatus.UNKNOWN:
+                            tiles[y+1][x] = TileStatus.OUTSIDE
+                case "U":
+                    if x < (len(tiles[0])-1):
+                        if tiles[y][x+1] == TileStatus.UNKNOWN:
+                            tiles[y][x+1] = TileStatus.INSIDE
+                    if y > 0:
+                        if tiles[y-1][x] == TileStatus.UNKNOWN:
+                            tiles[y-1][x] = TileStatus.INSIDE
+                case _:
+                    assert(False)
+            x = x - 1
+            for _ in range(instr.distance-1):                
+                if y > 0:
+                    if tiles[y-1][x] == TileStatus.UNKNOWN:
+                        tiles[y-1][x] = TileStatus.INSIDE
+                if y < (len(tiles)-1):
+                    if tiles[y+1][x] == TileStatus.UNKNOWN:
+                        tiles[y+1][x] = TileStatus.OUTSIDE
+                x = x - 1
         case "D":
-            y = y + instr.distance
+            match last_direction:
+                case "L":
+                    if y > 0:
+                        if tiles[y-1][x] == TileStatus.UNKNOWN:
+                            tiles[y-1][x] = TileStatus.INSIDE
+                    if x > 0:
+                        if tiles[y][x-1] == TileStatus.UNKNOWN:
+                            tiles[y][x-1] = TileStatus.INSIDE
+                case "R":
+                    if y > 0:
+                        if tiles[y-1][x] == TileStatus.UNKNOWN:
+                            tiles[y-1][x] = TileStatus.OUTSIDE
+                    if x < (len(tiles[0])-1):
+                        if tiles[y][x+1] == TileStatus.UNKNOWN:
+                            tiles[y][x+1] = TileStatus.OUTSIDE
+                case _:
+                    assert(False)
+            y = y + 1
+            for _ in range(instr.distance-1):                
+                if x < (len(tiles[0])-1):
+                    if tiles[y][x+1] == TileStatus.UNKNOWN:
+                        tiles[y][x+1] = TileStatus.OUTSIDE
+                if x > 0:
+                    if tiles[y][x-1] == TileStatus.UNKNOWN:
+                        tiles[y][x-1] = TileStatus.INSIDE
+                y = y + 1
         case "U":
-            y = y - instr.distance
+            match last_direction:
+                case "L":
+                    if x > 0:
+                        if tiles[y][x-1] == TileStatus.UNKNOWN:
+                            tiles[y][x-1] = TileStatus.OUTSIDE
+                    if y < (len(tiles)-1):
+                        if tiles[y+1][x] == TileStatus.UNKNOWN:
+                            tiles[y+1][x] = TileStatus.OUTSIDE
+                case "R":
+                    if x < (len(tiles[0])-1):
+                        if tiles[y][x+1] == TileStatus.UNKNOWN:
+                            tiles[y][x+1] = TileStatus.INSIDE
+                    if y < (len(tiles)-1):
+                        if tiles[y+1][x] == TileStatus.UNKNOWN:
+                            tiles[y+1][x] = TileStatus.INSIDE
+                case _:
+                    assert(False)
+            y = y - 1
+            for _ in range(instr.distance-1):                
+                if x < (len(tiles[0])-1):
+                    if tiles[y][x+1] == TileStatus.UNKNOWN:
+                        tiles[y][x+1] = TileStatus.INSIDE
+                if x > 0:
+                    if tiles[y][x-1] == TileStatus.UNKNOWN:
+                        tiles[y][x-1] = TileStatus.OUTSIDE
+                y = y - 1
         case _:
             assert(False)
-            
+    last_direction = instr.direction
+
+assert(x==0)
+assert(y==0)
+
+print(sum([sum([1 if tile == TileStatus.PATH else 0 for tile in tl]) for tl in tiles]))
