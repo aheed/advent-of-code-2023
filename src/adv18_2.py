@@ -43,8 +43,8 @@ y_coord=0
 #min_y = y
 #max_x = x
 #max_y = y
-x_coords: list[int] = [0]
-y_coords: list[int] = [0]
+x_coords: list[int] = []
+y_coords: list[int] = []
 for instr in instructions:
     match instr.direction:
         case "R":
@@ -66,23 +66,22 @@ for instr in instructions:
 
 #max_x = max_x - min_x
 #max_y = max_y - min_y
+
 x_coords = list(set(x_coords)) #remove duplicates
 y_coords = list(set(y_coords)) #remove duplicates
 x_coords.sort()
 y_coords.sort()
 
 print(x_coords, y_coords)
-tiles: list[list[TileStatus]] = [[TileStatus.UNKNOWN for _ in range(len(x_coords))] for _ in range(len(x_coords))]
+tiles: list[list[TileStatus]] = [[TileStatus.UNKNOWN for _ in range(1, len(x_coords))] for _ in range(1, len(y_coords))]
 
 
 #################
-
-
-#x_coord=0
-#y_coord=0
-x_index = 0
-y_index = 0
-last_direction = "U"
+x_start_index = x_coords.index(0)
+y_start_index = y_coords.index(0)
+x_index = x_start_index
+y_index = y_start_index
+last_direction = instructions[-1].direction
 for instr in instructions:
     #x_index = x_coords.index(x)
     #y_index = y_coords.index(y)
@@ -91,10 +90,12 @@ for instr in instructions:
         case "R":
             match last_direction:
                 case "U":
-                    if tiles[y_index][x_index-1] == TileStatus.UNKNOWN:
-                        tiles[y_index][x_index-1] = TileStatus.OUTSIDE
-                    if tiles[y_index-1][x_index] == TileStatus.UNKNOWN:
-                        tiles[y_index-1][x_index] = TileStatus.OUTSIDE
+                    if x_index > 0:
+                        if tiles[y_index][x_index-1] == TileStatus.UNKNOWN:
+                            tiles[y_index][x_index-1] = TileStatus.OUTSIDE
+                    if y_index > 0:
+                        if tiles[y_index-1][x_index] == TileStatus.UNKNOWN:
+                            tiles[y_index-1][x_index] = TileStatus.OUTSIDE
                 case "D":
                     pass
                 case _:
@@ -102,8 +103,9 @@ for instr in instructions:
             target_x_coord = x_coords[x_index] + instr.distance
             while x_coords[x_index] != target_x_coord:
                 tiles[y_index][x_index] = TileStatus.INSIDE
-                if tiles[y_index-1][x_index] == TileStatus.UNKNOWN:
-                    tiles[y_index-1][x_index] = TileStatus.OUTSIDE
+                if y_index > 0:
+                    if tiles[y_index-1][x_index] == TileStatus.UNKNOWN:
+                        tiles[y_index-1][x_index] = TileStatus.OUTSIDE
                 x_index = x_index + 1
         case "L":
             match last_direction:
@@ -121,16 +123,18 @@ for instr in instructions:
             target_x_coord = x_coords[x_index] - instr.distance
             while x_coords[x_index] != target_x_coord:
                 tiles[y_index][x_index] = TileStatus.INSIDE
-                if tiles[y_index+1][x_index] == TileStatus.UNKNOWN:
-                    tiles[y_index+1][x_index] = TileStatus.OUTSIDE
+                if y_index < (len(tiles)-1):
+                    if tiles[y_index+1][x_index] == TileStatus.UNKNOWN:
+                        tiles[y_index+1][x_index] = TileStatus.OUTSIDE
                 x_index = x_index - 1
         case "D":
             match last_direction:
                 case "L":
                     pass
                 case "R":
-                    if tiles[y_index-1][x_index] == TileStatus.UNKNOWN:
-                        tiles[y_index-1][x_index] = TileStatus.OUTSIDE
+                    if y_index > 0:
+                        if tiles[y_index-1][x_index] == TileStatus.UNKNOWN:
+                            tiles[y_index-1][x_index] = TileStatus.OUTSIDE
                     if x_index < (len(tiles[0])-1):
                         if tiles[y_index][x_index+1] == TileStatus.UNKNOWN:
                             tiles[y_index][x_index+1] = TileStatus.OUTSIDE
@@ -146,8 +150,9 @@ for instr in instructions:
         case "U":
             match last_direction:
                 case "L":
-                    if tiles[y_index][x_index-1] == TileStatus.UNKNOWN:
-                        tiles[y_index][x_index-1] = TileStatus.OUTSIDE
+                    if x_index > 0:
+                        if tiles[y_index][x_index-1] == TileStatus.UNKNOWN:
+                            tiles[y_index][x_index-1] = TileStatus.OUTSIDE
                     if y_index < (len(tiles)-1):
                         if tiles[y_index+1][x_index] == TileStatus.UNKNOWN:
                             tiles[y_index+1][x_index] = TileStatus.OUTSIDE
@@ -158,8 +163,9 @@ for instr in instructions:
             target_y_coord = y_coords[y_index] - instr.distance
             while y_coords[y_index] != target_y_coord:
                 tiles[y_index][x_index] = TileStatus.INSIDE
-                if tiles[y_index][x_index-1] == TileStatus.UNKNOWN:
-                    tiles[y_index][x_index-1] = TileStatus.OUTSIDE
+                if x_index > 0:
+                    if tiles[y_index][x_index-1] == TileStatus.UNKNOWN:
+                        tiles[y_index][x_index-1] = TileStatus.OUTSIDE
                 y_index = y_index - 1
         case _:
             assert(False)
@@ -167,8 +173,8 @@ for instr in instructions:
 
 assert(x_coord==0)
 assert(y_coord==0)
-assert(x_index==0)
-assert(y_index==0)
+#assert(x_index==x_start_index)
+#assert(y_index==y_start_index)
 
 #################
 def status_to_char(status: TileStatus) -> str:
@@ -213,13 +219,19 @@ while dirty:
 print_tiles()
 
 def get_tile_size(x_index:int, y_index:int) -> int:
-    width  = x_coords[x_index] - (x_coords[x_index-1] if x_index > 0 else 0)
+    width  = x_coords[x_index] - (x_coords[x_index-1] if x_index > 0 else 0) # what about negative coordinates???
     height = y_coords[y_index] - (y_coords[y_index-1] if y_index > 0 else 0)
     return width * height
 
 sum_inside_tiles = sum([sum([get_tile_size(x_index=x, y_index=y) if tiles[y][x] == TileStatus.INSIDE else 0 for x in range(len(x_coords))]) for y in range(len(y_coords))])
 print(sum_inside_tiles)
 
+
+#################
+# 
+# off-by-one somewhere?
+# how to deal with duplicate coordinates?
+# how to calculate tile size?
 #################
 
 """
