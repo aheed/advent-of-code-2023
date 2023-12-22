@@ -1,4 +1,3 @@
-from enum import Enum
 from dataclasses import dataclass
 import utils
 
@@ -140,4 +139,12 @@ Assume LRR:
     still works
   3 is R
     ?
+
+----------
+with positive values for right turns:
+
+identify instructions with 0 distance
+      -1 = -1 - 1
+      0 = - 2
+      remove 1 and 2
 """

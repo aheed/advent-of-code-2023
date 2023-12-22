@@ -55,7 +55,6 @@ print(max_x, max_y)
 
 class TileStatus(Enum):
     UNKNOWN = 1
-    PATH = 2
     OUTSIDE = 3
     INSIDE = 4
 
@@ -67,35 +66,24 @@ x=0
 y=0
 last_direction = "U"
 for instr in instructions:
-    tiles[y][x] = TileStatus.PATH
+    tiles[y][x] = TileStatus.INSIDE
     match instr.direction:
         case "R":
             match last_direction:
-                case "D":
-                    if x > 0:
-                        if tiles[y][x-1] == TileStatus.UNKNOWN:
-                            tiles[y][x-1] = TileStatus.INSIDE
-                    if y < (len(tiles)-1):
-                        if tiles[y+1][x] == TileStatus.UNKNOWN:
-                            tiles[y+1][x] = TileStatus.INSIDE
                 case "U":
-                    if x > 0:
-                        if tiles[y][x-1] == TileStatus.UNKNOWN:
-                            tiles[y][x-1] = TileStatus.OUTSIDE
-                    if y > 0:
-                        if tiles[y-1][x] == TileStatus.UNKNOWN:
-                            tiles[y-1][x] = TileStatus.OUTSIDE
+                    if tiles[y][x-1] == TileStatus.UNKNOWN:
+                        tiles[y][x-1] = TileStatus.OUTSIDE
+                    if tiles[y-1][x] == TileStatus.UNKNOWN:
+                        tiles[y-1][x] = TileStatus.OUTSIDE
+                case "D":
+                    pass
                 case _:
                     assert(False)
             x = x + 1
             for _ in range(instr.distance-1):
-                tiles[y][x] = TileStatus.PATH
-                if y > 0:
-                    if tiles[y-1][x] == TileStatus.UNKNOWN:
-                        tiles[y-1][x] = TileStatus.OUTSIDE
-                if y < (len(tiles)-1):
-                    if tiles[y+1][x] == TileStatus.UNKNOWN:
-                        tiles[y+1][x] = TileStatus.INSIDE
+                tiles[y][x] = TileStatus.INSIDE
+                if tiles[y-1][x] == TileStatus.UNKNOWN:
+                    tiles[y-1][x] = TileStatus.OUTSIDE
                 x = x + 1
         case "L":
             match last_direction:
@@ -107,20 +95,12 @@ for instr in instructions:
                         if tiles[y+1][x] == TileStatus.UNKNOWN:
                             tiles[y+1][x] = TileStatus.OUTSIDE
                 case "U":
-                    if x < (len(tiles[0])-1):
-                        if tiles[y][x+1] == TileStatus.UNKNOWN:
-                            tiles[y][x+1] = TileStatus.INSIDE
-                    if y > 0:
-                        if tiles[y-1][x] == TileStatus.UNKNOWN:
-                            tiles[y-1][x] = TileStatus.INSIDE
+                    pass
                 case _:
                     assert(False)
             x = x - 1
             for _ in range(instr.distance-1):
-                tiles[y][x] = TileStatus.PATH                
-                if y > 0:
-                    if tiles[y-1][x] == TileStatus.UNKNOWN:
-                        tiles[y-1][x] = TileStatus.INSIDE
+                tiles[y][x] = TileStatus.INSIDE
                 if y < (len(tiles)-1):
                     if tiles[y+1][x] == TileStatus.UNKNOWN:
                         tiles[y+1][x] = TileStatus.OUTSIDE
@@ -128,16 +108,10 @@ for instr in instructions:
         case "D":
             match last_direction:
                 case "L":
-                    if y > 0:
-                        if tiles[y-1][x] == TileStatus.UNKNOWN:
-                            tiles[y-1][x] = TileStatus.INSIDE
-                    if x > 0:
-                        if tiles[y][x-1] == TileStatus.UNKNOWN:
-                            tiles[y][x-1] = TileStatus.INSIDE
+                    pass
                 case "R":
-                    if y > 0:
-                        if tiles[y-1][x] == TileStatus.UNKNOWN:
-                            tiles[y-1][x] = TileStatus.OUTSIDE
+                    if tiles[y-1][x] == TileStatus.UNKNOWN:
+                        tiles[y-1][x] = TileStatus.OUTSIDE
                     if x < (len(tiles[0])-1):
                         if tiles[y][x+1] == TileStatus.UNKNOWN:
                             tiles[y][x+1] = TileStatus.OUTSIDE
@@ -145,41 +119,28 @@ for instr in instructions:
                     assert(False)
             y = y + 1
             for _ in range(instr.distance-1):
-                tiles[y][x] = TileStatus.PATH                
+                tiles[y][x] = TileStatus.INSIDE
                 if x < (len(tiles[0])-1):
                     if tiles[y][x+1] == TileStatus.UNKNOWN:
                         tiles[y][x+1] = TileStatus.OUTSIDE
-                if x > 0:
-                    if tiles[y][x-1] == TileStatus.UNKNOWN:
-                        tiles[y][x-1] = TileStatus.INSIDE
                 y = y + 1
         case "U":
             match last_direction:
                 case "L":
-                    if x > 0:
-                        if tiles[y][x-1] == TileStatus.UNKNOWN:
-                            tiles[y][x-1] = TileStatus.OUTSIDE
+                    if tiles[y][x-1] == TileStatus.UNKNOWN:
+                        tiles[y][x-1] = TileStatus.OUTSIDE
                     if y < (len(tiles)-1):
                         if tiles[y+1][x] == TileStatus.UNKNOWN:
                             tiles[y+1][x] = TileStatus.OUTSIDE
                 case "R":
-                    if x < (len(tiles[0])-1):
-                        if tiles[y][x+1] == TileStatus.UNKNOWN:
-                            tiles[y][x+1] = TileStatus.INSIDE
-                    if y < (len(tiles)-1):
-                        if tiles[y+1][x] == TileStatus.UNKNOWN:
-                            tiles[y+1][x] = TileStatus.INSIDE
+                    pass
                 case _:
                     assert(False)
             y = y - 1
             for _ in range(instr.distance-1):
-                tiles[y][x] = TileStatus.PATH                
-                if x < (len(tiles[0])-1):
-                    if tiles[y][x+1] == TileStatus.UNKNOWN:
-                        tiles[y][x+1] = TileStatus.INSIDE
-                if x > 0:
-                    if tiles[y][x-1] == TileStatus.UNKNOWN:
-                        tiles[y][x-1] = TileStatus.OUTSIDE
+                tiles[y][x] = TileStatus.INSIDE                
+                if tiles[y][x-1] == TileStatus.UNKNOWN:
+                    tiles[y][x-1] = TileStatus.OUTSIDE
                 y = y - 1
         case _:
             assert(False)
@@ -192,8 +153,6 @@ def status_to_char(status: TileStatus) -> str:
     match status:
         case TileStatus.UNKNOWN:
             return "?"
-        case TileStatus.PATH:
-            return "#"
         case TileStatus.INSIDE:
             return "I"
         case TileStatus.OUTSIDE:
@@ -214,11 +173,9 @@ while dirty:
         for y in range(len(tiles)):
             if tiles[y][x] == TileStatus.UNKNOWN:
                 dirty = True
-                if x > 0:
-                    neighbor_status = tiles[y][x-1]
-                    if neighbor_status == TileStatus.INSIDE or neighbor_status == TileStatus.OUTSIDE:
-                        tiles[y][x] = neighbor_status
-                if y > 0:
+                neighbor_status = tiles[y][x-1]
+                if neighbor_status == TileStatus.INSIDE or neighbor_status == TileStatus.OUTSIDE:
+                    tiles[y][x] = neighbor_status
                     neighbor_status = tiles[y-1][x]
                     if neighbor_status == TileStatus.INSIDE or neighbor_status == TileStatus.OUTSIDE:
                         tiles[y][x] = neighbor_status
@@ -233,10 +190,7 @@ while dirty:
 
 print_tiles()
 
-nof_path_tiles = sum([sum([1 if tile == TileStatus.PATH else 0 for tile in tl]) for tl in tiles])
-print(nof_path_tiles)
-nof_inside_tiles = sum([sum([1 if tile == TileStatus.INSIDE else 0 for tile in tl]) for tl in tiles])
-print(nof_inside_tiles)
 nof_outside_tiles = sum([sum([1 if tile == TileStatus.OUTSIDE else 0 for tile in tl]) for tl in tiles])
 print(nof_outside_tiles)
-print(nof_path_tiles + nof_inside_tiles)
+nof_inside_tiles = sum([sum([1 if tile == TileStatus.INSIDE else 0 for tile in tl]) for tl in tiles])
+print(nof_inside_tiles)
