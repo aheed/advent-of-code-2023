@@ -100,7 +100,7 @@ for instr in instructions:
                         if tiles[y_index-1][x_index] == TileStatus.UNKNOWN:
                             tiles[y_index-1][x_index] = TileStatus.OUTSIDE
                 case "D":
-                    pass
+                    extras = extras - 1
                 case _:
                     assert(False)
             target_x_coord = x_coords[x_index] + instr.distance
@@ -143,7 +143,7 @@ for instr in instructions:
                     if x_index < (len(tiles[0])-1):
                         if tiles[y_index][x_index+1] == TileStatus.UNKNOWN:
                             tiles[y_index][x_index+1] = TileStatus.OUTSIDE
-                    #extras = extras + 1
+                    extras = extras + 1
                 case _:
                     assert(False)
             target_y_coord = y_coords[y_index] + instr.distance
@@ -236,6 +236,9 @@ sum_inside_tiles = sum([sum([get_tile_size(x_index=x, y_index=y) if tiles[y][x] 
 print(sum_inside_tiles)
 print(extras)
 print(sum_inside_tiles + extras)
+
+# 124668364997497 is too high
+
 
 #################
 # 
