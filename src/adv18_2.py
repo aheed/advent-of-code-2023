@@ -43,8 +43,8 @@ y_coord=0
 #min_y = y
 #max_x = x
 #max_y = y
-x_coords: list[int] = []
-y_coords: list[int] = []
+x_coords: list[int] = [x_coord]
+y_coords: list[int] = [y_coord]
 for instr in instructions:
     match instr.direction:
         case "R":
@@ -83,9 +83,6 @@ x_index = x_start_index
 y_index = y_start_index
 last_direction = instructions[-1].direction
 for instr in instructions:
-    #x_index = x_coords.index(x)
-    #y_index = y_coords.index(y)
-    tiles[y_index][x_index] = TileStatus.INSIDE
     match instr.direction:
         case "R":
             match last_direction:
@@ -110,7 +107,7 @@ for instr in instructions:
         case "L":
             match last_direction:
                 case "D":
-                    if x_index < (len(tiles[0])-1):
+                    if x_index < (len(tiles[0])-1) and y_index < len(tiles):
                         if tiles[y_index][x_index+1] == TileStatus.UNKNOWN:
                             tiles[y_index][x_index+1] = TileStatus.OUTSIDE
                     if y_index < (len(tiles)-1):
@@ -122,17 +119,18 @@ for instr in instructions:
                     assert(False)
             target_x_coord = x_coords[x_index] - instr.distance
             while x_coords[x_index] != target_x_coord:
-                tiles[y_index][x_index] = TileStatus.INSIDE
-                if y_index < (len(tiles)-1):
-                    if tiles[y_index+1][x_index] == TileStatus.UNKNOWN:
-                        tiles[y_index+1][x_index] = TileStatus.OUTSIDE
+                if y_index > 0 and x_index > 0:
+                    tiles[y_index-1][x_index-1] = TileStatus.INSIDE
+                if y_index < (len(tiles)) and x_index > 0:
+                    if tiles[y_index][x_index-1] == TileStatus.UNKNOWN:
+                        tiles[y_index][x_index-1] = TileStatus.OUTSIDE
                 x_index = x_index - 1
         case "D":
             match last_direction:
                 case "L":
                     pass
                 case "R":
-                    if y_index > 0:
+                    if y_index > 0 and x_index < len(tiles[0]):
                         if tiles[y_index-1][x_index] == TileStatus.UNKNOWN:
                             tiles[y_index-1][x_index] = TileStatus.OUTSIDE
                     if x_index < (len(tiles[0])-1):
@@ -142,15 +140,16 @@ for instr in instructions:
                     assert(False)
             target_y_coord = y_coords[y_index] + instr.distance
             while y_coords[y_index] != target_y_coord:
-                tiles[y_index][x_index] = TileStatus.INSIDE
-                if x_index < (len(tiles[0])-1):
-                    if tiles[y_index][x_index+1] == TileStatus.UNKNOWN:
-                        tiles[y_index][x_index+1] = TileStatus.OUTSIDE
+                if x_index > 0:
+                    tiles[y_index][x_index-1] = TileStatus.INSIDE
+                if x_index < len(tiles[0]):
+                    if tiles[y_index][x_index] == TileStatus.UNKNOWN:
+                        tiles[y_index][x_index] = TileStatus.OUTSIDE
                 y_index = y_index + 1
         case "U":
             match last_direction:
                 case "L":
-                    if x_index > 0:
+                    if x_index > 0 and y_index < (len(tiles)-1):
                         if tiles[y_index][x_index-1] == TileStatus.UNKNOWN:
                             tiles[y_index][x_index-1] = TileStatus.OUTSIDE
                     if y_index < (len(tiles)-1):
@@ -162,10 +161,11 @@ for instr in instructions:
                     assert(False)
             target_y_coord = y_coords[y_index] - instr.distance
             while y_coords[y_index] != target_y_coord:
-                tiles[y_index][x_index] = TileStatus.INSIDE
-                if x_index > 0:
-                    if tiles[y_index][x_index-1] == TileStatus.UNKNOWN:
-                        tiles[y_index][x_index-1] = TileStatus.OUTSIDE
+                if y_index > 0:
+                    tiles[y_index-1][x_index] = TileStatus.INSIDE
+                if x_index > 0 and y_index > 0:
+                    if tiles[y_index-1][x_index-1] == TileStatus.UNKNOWN:
+                        tiles[y_index-1][x_index-1] = TileStatus.OUTSIDE
                 y_index = y_index - 1
         case _:
             assert(False)
@@ -219,11 +219,11 @@ while dirty:
 print_tiles()
 
 def get_tile_size(x_index:int, y_index:int) -> int:
-    width  = x_coords[x_index] - (x_coords[x_index-1] if x_index > 0 else 0) # what about negative coordinates???
-    height = y_coords[y_index] - (y_coords[y_index-1] if y_index > 0 else 0)
+    width  = x_coords[x_index + 1] - x_coords[x_index]
+    height = y_coords[y_index + 1] - y_coords[y_index]
     return width * height
 
-sum_inside_tiles = sum([sum([get_tile_size(x_index=x, y_index=y) if tiles[y][x] == TileStatus.INSIDE else 0 for x in range(len(x_coords))]) for y in range(len(y_coords))])
+sum_inside_tiles = sum([sum([get_tile_size(x_index=x, y_index=y) if tiles[y][x] == TileStatus.INSIDE else 0 for x in range(len(x_coords)-1)]) for y in range(len(y_coords)-1)])
 print(sum_inside_tiles)
 
 
@@ -232,6 +232,9 @@ print(sum_inside_tiles)
 # off-by-one somewhere?
 # how to deal with duplicate coordinates?
 # how to calculate tile size?
+# normalize to avoid negative coordinates?
+# tiles to be identified by coordinates of upper left corner?
+# "around the corner" setting of outside status (based on last_direction) not necessary?
 #################
 
 """
