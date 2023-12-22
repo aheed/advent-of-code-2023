@@ -33,8 +33,13 @@ def get_instruction(line: str) -> Instruction:
     parts = line.split(" ")
     return Instruction(direction=get_direction(int(parts[2][-2:-1])), dbg=int(parts[1]), distance=int(parts[2][2:-2], 16))
 
+def get_instruction_day_1(line: str) -> Instruction:
+    parts = line.split(" ")
+    return Instruction(direction=parts[0], distance=int(parts[1]), dbg=0)
+
 instructions = [get_instruction(line) for line in lines]
-#print(instructions)
+#instructions = [get_instruction_day_1(line) for line in lines]
+print(instructions)
 
 
 x_coord=0
@@ -82,6 +87,7 @@ y_start_index = y_coords.index(0)
 x_index = x_start_index
 y_index = y_start_index
 last_direction = instructions[-1].direction
+extras = 0
 for instr in instructions:
     match instr.direction:
         case "R":
@@ -98,8 +104,9 @@ for instr in instructions:
                 case _:
                     assert(False)
             target_x_coord = x_coords[x_index] + instr.distance
+            extras = extras + instr.distance
             while x_coords[x_index] != target_x_coord:
-                tiles[y_index][x_index] = TileStatus.INSIDE
+                tiles[y_index][x_index] = TileStatus.INSIDE                
                 if y_index > 0:
                     if tiles[y_index-1][x_index] == TileStatus.UNKNOWN:
                         tiles[y_index-1][x_index] = TileStatus.OUTSIDE
@@ -110,7 +117,7 @@ for instr in instructions:
                     if x_index < (len(tiles[0])-1) and y_index < len(tiles):
                         if tiles[y_index][x_index+1] == TileStatus.UNKNOWN:
                             tiles[y_index][x_index+1] = TileStatus.OUTSIDE
-                    if y_index < (len(tiles)-1):
+                    if y_index < (len(tiles)-1) and x_index < len(tiles[0]):
                         if tiles[y_index+1][x_index] == TileStatus.UNKNOWN:
                             tiles[y_index+1][x_index] = TileStatus.OUTSIDE
                 case "U":
@@ -136,9 +143,11 @@ for instr in instructions:
                     if x_index < (len(tiles[0])-1):
                         if tiles[y_index][x_index+1] == TileStatus.UNKNOWN:
                             tiles[y_index][x_index+1] = TileStatus.OUTSIDE
+                    #extras = extras + 1
                 case _:
                     assert(False)
             target_y_coord = y_coords[y_index] + instr.distance
+            extras = extras + instr.distance
             while y_coords[y_index] != target_y_coord:
                 if x_index > 0:
                     tiles[y_index][x_index-1] = TileStatus.INSIDE
@@ -225,11 +234,13 @@ def get_tile_size(x_index:int, y_index:int) -> int:
 
 sum_inside_tiles = sum([sum([get_tile_size(x_index=x, y_index=y) if tiles[y][x] == TileStatus.INSIDE else 0 for x in range(len(x_coords)-1)]) for y in range(len(y_coords)-1)])
 print(sum_inside_tiles)
-
+print(extras)
+print(sum_inside_tiles + extras)
 
 #################
 # 
 # off-by-one somewhere?
+#  We are supposed to go one step longer than the instruction distance every time !!?
 # how to deal with duplicate coordinates?
 # how to calculate tile size?
 # normalize to avoid negative coordinates?
