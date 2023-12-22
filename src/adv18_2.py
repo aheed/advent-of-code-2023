@@ -88,6 +88,7 @@ x_index = x_start_index
 y_index = y_start_index
 last_direction = instructions[-1].direction
 extras = 0
+orientation = 0
 for instr in instructions:
     match instr.direction:
         case "R":
@@ -99,8 +100,10 @@ for instr in instructions:
                     if y_index > 0:
                         if tiles[y_index-1][x_index] == TileStatus.UNKNOWN:
                             tiles[y_index-1][x_index] = TileStatus.OUTSIDE
+                    orientation = orientation + 1
                 case "D":
                     extras = extras - 1
+                    orientation = orientation - 1
                 case _:
                     assert(False)
             target_x_coord = x_coords[x_index] + instr.distance
@@ -120,8 +123,9 @@ for instr in instructions:
                     if y_index < (len(tiles)-1) and x_index < len(tiles[0]):
                         if tiles[y_index+1][x_index] == TileStatus.UNKNOWN:
                             tiles[y_index+1][x_index] = TileStatus.OUTSIDE
+                    orientation = orientation + 1
                 case "U":
-                    pass
+                    orientation = orientation - 1
                 case _:
                     assert(False)
             target_x_coord = x_coords[x_index] - instr.distance
@@ -135,7 +139,7 @@ for instr in instructions:
         case "D":
             match last_direction:
                 case "L":
-                    pass
+                    orientation = orientation - 1
                 case "R":
                     if y_index > 0 and x_index < len(tiles[0]):
                         if tiles[y_index-1][x_index] == TileStatus.UNKNOWN:
@@ -144,6 +148,7 @@ for instr in instructions:
                         if tiles[y_index][x_index+1] == TileStatus.UNKNOWN:
                             tiles[y_index][x_index+1] = TileStatus.OUTSIDE
                     extras = extras + 1
+                    orientation = orientation + 1
                 case _:
                     assert(False)
             target_y_coord = y_coords[y_index] + instr.distance
@@ -164,8 +169,9 @@ for instr in instructions:
                     if y_index < (len(tiles)-1):
                         if tiles[y_index+1][x_index] == TileStatus.UNKNOWN:
                             tiles[y_index+1][x_index] = TileStatus.OUTSIDE
+                    orientation = orientation + 1
                 case "R":
-                    pass
+                    orientation = orientation - 1
                 case _:
                     assert(False)
             target_y_coord = y_coords[y_index] - instr.distance
@@ -210,9 +216,11 @@ while dirty:
         for y in range(len(tiles)):
             if tiles[y][x] == TileStatus.UNKNOWN:
                 dirty = True
-                neighbor_status = tiles[y][x-1]
-                if neighbor_status == TileStatus.INSIDE or neighbor_status == TileStatus.OUTSIDE:
-                    tiles[y][x] = neighbor_status
+                if x > 0:
+                    neighbor_status = tiles[y][x-1]
+                    if neighbor_status == TileStatus.INSIDE or neighbor_status == TileStatus.OUTSIDE:
+                        tiles[y][x] = neighbor_status
+                if y > 0:
                     neighbor_status = tiles[y-1][x]
                     if neighbor_status == TileStatus.INSIDE or neighbor_status == TileStatus.OUTSIDE:
                         tiles[y][x] = neighbor_status
@@ -233,12 +241,15 @@ def get_tile_size(x_index:int, y_index:int) -> int:
     return width * height
 
 sum_inside_tiles = sum([sum([get_tile_size(x_index=x, y_index=y) if tiles[y][x] == TileStatus.INSIDE else 0 for x in range(len(x_coords)-1)]) for y in range(len(y_coords)-1)])
+print(orientation)
 print(sum_inside_tiles)
 print(extras)
 print(sum_inside_tiles + extras)
 
 # 124668364997497 is too high
-
+# some corners look odd in printout. More off-by-one bugs?
+#  only unnecessary OUTSIDE assignments? Harmless?
+# Something strange in floodfilled printout. Something is leaking?
 
 #################
 # 
