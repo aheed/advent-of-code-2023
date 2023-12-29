@@ -117,10 +117,68 @@ workflows: dict[str, Workflow] = {wf.name: wf for wf in workflow_list}
 
 ######
 generous_filter = Filter(min={"x": 1, "m": 1, "a": 1, "s": 1}, max={"x": 4000, "m": 4000, "a": 4000, "s": 4000})
-#a, b, c = divide_filter(filter=generous_filter, rule=workflows["px"].rules[0])
+a, b, c = divide_filter(filter=generous_filter, rule=workflows["lnx"].rules[0])
+print(get_nof_combinations(a), get_nof_combinations(b), get_nof_combinations(c))
 
 result = nof_combos_by_workflow(filter=generous_filter, workflow=workflows["in"])
 print(result)
 
 # 167409079868000 is ex result
 # 199630070686152 is too high
+
+@dataclass(frozen=True)
+class LimitRange:
+    max: int
+    min: int
+
+def diff(original: Filter, extra: Filter) -> list[Filter]:
+    """
+    Returns the union of original and extra as a disjoint set of filters
+    """
+    ranges: list[dict[str, LimitRange]] = [{}, {}]
+    for key in original.max.keys(): #could just as well be extra or min. Keys should be the same.
+        top_max = extra.max[key]
+        top_min = original.max[key]+1
+        ranges[0][key] = LimitRange(max=top_max, min=top_min)
+        bottom_max = original.min[key]-1
+        bottom_min = extra.min[key]
+        ranges[1][key] = LimitRange(max=bottom_max, min=bottom_min)
+    
+    ret: list[Filter] = []
+    for x_ix in range(2): # 0=top, 1=bottom
+        for m_ix in range(2):
+            for a_ix in range(2):
+                for s_ix in range(2):
+                    #create filter for combination of conditions and add to result list
+                    ret.append(Filter(min={"x": ranges[x_ix]["x"].min, "m": ranges[m_ix]["m"].min, "a": ranges[a_ix]["a"].min, "s": ranges[s_ix]["s"].min}, max={"x": ranges[x_ix]["x"].max, "m": ranges[m_ix]["m"].max, "a": ranges[a_ix]["a"].max, "s": ranges[s_ix]["s"].max}))
+
+    # filter out filters with 0 combinations. Not strictly necessary.
+    ret = [f for f in ret if get_nof_combinations(filter=f) > 0]
+
+    # return what is left. Could be empty list.
+    return ret
+    
+"""
+Likely cause of incorrect result: reported accepted filters are not disjoint.
+To do: 
+    collect reported accepted filters
+    Reduce the accepted collection to a set of disjoint filters
+        Start disjoint collection as a single zero filter.
+            For each accepted filter
+                For each disjoint filter
+                    Create a collection of new disjoint filters that is the "excess" not already covered by the disjoint filter.
+                    Add them to the disjoint filter collection.
+    sum up combinations of all disjoint filters
+
+Not good enough! Pair-wise comparison of filters as described above will not be enough.
+Perhaps a new filter definition with support for arbitrary (disjoint) ranges is what we need.
+  How to diff that kind of filter?
+  Operations that must be supported:
+    divide by rule
+    diff (?), maybe not needed. We just need to calc total number of combinations from a collection of filters. OK to iterate 4000 values.    
+
+  List of int
+    even indexes are min, odd indexes are max
+
+Maybe just calc total by iterating all 4000 values (x4) will work. Even with old filter definition. No diff needed.
+"""
