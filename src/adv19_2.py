@@ -56,8 +56,14 @@ def divide_filter(filter: Filter, rule: Rule) -> tuple[Filter, Filter, Filter]:
 def get_nof_combinations(filter: Filter) -> int:
     return math.prod([max(0, filter.max[key] - filter.min[key] + 1) for key in filter.max.keys()])
 
+accepted_filters: list[Filter] = []
+
 def nof_combos_by_applicable_rule(filter: Filter, rule: Rule) -> int:
     if rule.action == "A":
+        if get_nof_combinations(filter=filter) > 0:
+            accepted_filters.append(filter)
+        else:
+            print("useless filter")
         return get_nof_combinations(filter=filter)
     
     if rule.action == "R":
@@ -117,8 +123,8 @@ workflows: dict[str, Workflow] = {wf.name: wf for wf in workflow_list}
 
 ######
 generous_filter = Filter(min={"x": 1, "m": 1, "a": 1, "s": 1}, max={"x": 4000, "m": 4000, "a": 4000, "s": 4000})
-a, b, c = divide_filter(filter=generous_filter, rule=workflows["lnx"].rules[0])
-print(get_nof_combinations(a), get_nof_combinations(b), get_nof_combinations(c))
+#a, b, c = divide_filter(filter=generous_filter, rule=workflows["lnx"].rules[0])
+#print(get_nof_combinations(a), get_nof_combinations(b), get_nof_combinations(c))
 
 result = nof_combos_by_workflow(filter=generous_filter, workflow=workflows["in"])
 print(result)
@@ -126,38 +132,25 @@ print(result)
 # 167409079868000 is ex result
 # 199630070686152 is too high
 
-@dataclass(frozen=True)
-class LimitRange:
-    max: int
-    min: int
+def calc_nof_accepted_values(param: str) -> int:
+    filter_in_range: list[bool] = [False] * len(accepted_filters) # same index as accepted_filters
+    total = 0
+    for n in range(1, 4000):
+        n_is_accepted = False
+        for f_ix in range(len(accepted_filters)):            
+            if accepted_filters[f_ix].min[param] == n:
+                filter_in_range[f_ix] = True
+            if filter_in_range[f_ix]:
+                n_is_accepted = True
+            if accepted_filters[f_ix].max[param] == n:
+                filter_in_range[f_ix] = False
+        if n_is_accepted:
+            total = total + 1
+    return total
 
-def diff(original: Filter, extra: Filter) -> list[Filter]:
-    """
-    Returns the union of original and extra as a disjoint set of filters
-    """
-    ranges: list[dict[str, LimitRange]] = [{}, {}]
-    for key in original.max.keys(): #could just as well be extra or min. Keys should be the same.
-        top_max = extra.max[key]
-        top_min = original.max[key]+1
-        ranges[0][key] = LimitRange(max=top_max, min=top_min)
-        bottom_max = original.min[key]-1
-        bottom_min = extra.min[key]
-        ranges[1][key] = LimitRange(max=bottom_max, min=bottom_min)
-    
-    ret: list[Filter] = []
-    for x_ix in range(2): # 0=top, 1=bottom
-        for m_ix in range(2):
-            for a_ix in range(2):
-                for s_ix in range(2):
-                    #create filter for combination of conditions and add to result list
-                    ret.append(Filter(min={"x": ranges[x_ix]["x"].min, "m": ranges[m_ix]["m"].min, "a": ranges[a_ix]["a"].min, "s": ranges[s_ix]["s"].min}, max={"x": ranges[x_ix]["x"].max, "m": ranges[m_ix]["m"].max, "a": ranges[a_ix]["a"].max, "s": ranges[s_ix]["s"].max}))
+res2 = calc_nof_accepted_values("x") * calc_nof_accepted_values("m") * calc_nof_accepted_values("a") * calc_nof_accepted_values("s")
+print(res2)
 
-    # filter out filters with 0 combinations. Not strictly necessary.
-    ret = [f for f in ret if get_nof_combinations(filter=f) > 0]
-
-    # return what is left. Could be empty list.
-    return ret
-    
 """
 Likely cause of incorrect result: reported accepted filters are not disjoint.
 To do: 
@@ -181,4 +174,26 @@ Perhaps a new filter definition with support for arbitrary (disjoint) ranges is 
     even indexes are min, odd indexes are max
 
 Maybe just calc total by iterating all 4000 values (x4) will work. Even with old filter definition. No diff needed.
+
+Still not good enough! The filters still need to be disjoint.
+Perhaps Iterate all combos of max- and min values. Each "hit" (any filter is on) adds to the total size_of_current_range("x") * size_of...
+
+Pruned iteration?
+  iterate all numbers 1-4000 or "significant range limits" for "x"
+    select all "on" filters
+    iterate all numbers 1-4000 or "significant range limits" for "m"
+        ...
+        etc
+
+for i in range(1, 4000):
+    if param == "s"
+        if any(filter is on):
+            total = total + 1 (or range size)
+    else
+        remaining_filters = [f for f in filters if filter is on with respect to param]
+        if len(remaining_filters) > 0:
+            next_param = ...
+            total = total + recursive call (remaining_filters, next_param)
+
 """
+
