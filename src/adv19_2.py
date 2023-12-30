@@ -84,10 +84,11 @@ def nof_combos_by_workflow(filter: Filter, workflow: Workflow) -> int:
         for f in filters:
             applicable, top, bottom = divide_filter(filter=f, rule=rule)
             total = total + nof_combos_by_applicable_rule(filter=applicable, rule=rule)
-            new_filters = new_filters + [top, bottom]
+            #new_filters = new_filters + [top, bottom]
+            new_filters = new_filters + [zz for zz in [top, bottom] if get_nof_combinations(filter=zz) > 0]
 
         filters = new_filters
-
+    assert(len(filters) == 0) # last rule should always be unconditional
     return total
 
 ###
@@ -128,9 +129,12 @@ generous_filter = Filter(min={"x": 1, "m": 1, "a": 1, "s": 1}, max={"x": 4000, "
 
 result = nof_combos_by_workflow(filter=generous_filter, workflow=workflows["in"])
 print(result)
+result_b = sum([get_nof_combinations(filter=f) for f in accepted_filters])
+print(result_b)
 
 # 167409079868000 is ex result
 # 199630070686152 is too high
+# 124332452265904 is too low
 
 def calc_nof_accepted_values(param: str) -> int:
     filter_in_range: list[bool] = [False] * len(accepted_filters) # same index as accepted_filters
@@ -148,8 +152,8 @@ def calc_nof_accepted_values(param: str) -> int:
             total = total + 1
     return total
 
-res2 = calc_nof_accepted_values("x") * calc_nof_accepted_values("m") * calc_nof_accepted_values("a") * calc_nof_accepted_values("s")
-print(res2)
+#res2 = calc_nof_accepted_values("x") * calc_nof_accepted_values("m") * calc_nof_accepted_values("a") * calc_nof_accepted_values("s")
+#print(res2)
 
 def max_vals(param: str) -> list[int]:
     return [f.max[param] for f in accepted_filters]
@@ -162,7 +166,42 @@ min_v = min_vals("x") + min_vals("m") + min_vals("a") + min_vals("s")
 all_vals = list(set(max_v + min_v)) # remove duplicates
 
 #########################
+def intersect_param(f1: Filter, f2: Filter, param: str) -> tuple[int, int]:
+    intersection_min = max(f1.min[param], f2.min[param])
+    intersection_max = min(f1.max[param], f2.max[param])
+    return (intersection_min, intersection_max)
 
+def calc_overlapping_combos(f1: Filter, f2: Filter) -> int:
+    x_min, x_max = intersect_param(f1=f1, f2=f2,  param="x")
+    m_min, m_max = intersect_param(f1=f1, f2=f2,  param="m")
+    a_min, a_max = intersect_param(f1=f1, f2=f2,  param="a")
+    s_min, s_max = intersect_param(f1=f1, f2=f2,  param="s")
+    intersection_filter = Filter(min={"x": x_min, "m": m_min, "a": a_min, "s": s_min}, max={"x": x_max, "m": m_max, "a": a_max, "s": s_max})
+    return get_nof_combinations(filter=intersection_filter)
+
+included_filters: list[Filter] = []
+total_overlapping = 0
+for accepted in accepted_filters:
+    for included in included_filters:
+        new_overlap = calc_overlapping_combos(f1=included, f2=accepted)
+        if new_overlap > 0:
+            print("overlap!")
+        total_overlapping = total_overlapping + new_overlap
+    included_filters.append(accepted)
+print("zzz")
+print(result_b)
+print(total_overlapping)
+print(result_b - total_overlapping)
+print("zzzz")
+
+t = Filter(min={"x": 1, "m": 1, "a": 1, "s": 1}, max={"x": 1000, "m": 2000-100, "a": 3000, "s": 3001})
+t2 = Filter(min={"x": 1000, "m": 2000, "a": 3000, "s": 3000}, max={"x": 4000, "m": 4000, "a": 4000, "s": 4000})
+ol = calc_overlapping_combos(f1=t, f2=t2)
+print(ol)
+
+#########################
+
+"""
 def calc_nof_combos(filters: list[Filter], param: str) -> int:
     total = 0
     for i in range(len(all_vals)):
@@ -189,6 +228,7 @@ def calc_nof_combos(filters: list[Filter], param: str) -> int:
 
 res3 = calc_nof_combos(filters=accepted_filters, param="x")
 print(res3)
+"""
 
 """
 Likely cause of incorrect result: reported accepted filters are not disjoint.
