@@ -151,6 +151,45 @@ def calc_nof_accepted_values(param: str) -> int:
 res2 = calc_nof_accepted_values("x") * calc_nof_accepted_values("m") * calc_nof_accepted_values("a") * calc_nof_accepted_values("s")
 print(res2)
 
+def max_vals(param: str) -> list[int]:
+    return [f.max[param] for f in accepted_filters]
+
+def min_vals(param: str) -> list[int]:
+    return [f.min[param] for f in accepted_filters]
+
+max_v = max_vals("x") + max_vals("m") + max_vals("a") + max_vals("s")
+min_v = min_vals("x") + min_vals("m") + min_vals("a") + min_vals("s")
+all_vals = list(set(max_v + min_v)) # remove duplicates
+
+#########################
+
+def calc_nof_combos(filters: list[Filter], param: str) -> int:
+    total = 0
+    for i in range(len(all_vals)):
+        limit = all_vals[i]
+        if param == "s":
+            if any((True if (limit >= f.min[param] and limit <= f.max[param]) else False for f in filters)):
+                total = total + 1 #temp!!!!!!!!!!!!
+        else:
+            remaining_filters = [f for f in filters if (limit >= f.min[param] and limit <= f.max[param])]
+            if len(remaining_filters) > 0:
+                match param:
+                    case "x":
+                        next_param = "m"
+                    case "m":
+                        next_param = "a"
+                    case "a":
+                        next_param = "s"
+                    case _:
+                        assert(False)
+                total = total + calc_nof_combos(filters=remaining_filters, param=next_param)
+        if param == "x":
+            print(i)
+    return total
+
+res3 = calc_nof_combos(filters=accepted_filters, param="x")
+print(res3)
+
 """
 Likely cause of incorrect result: reported accepted filters are not disjoint.
 To do: 
@@ -184,16 +223,6 @@ Pruned iteration?
     iterate all numbers 1-4000 or "significant range limits" for "m"
         ...
         etc
-
-for i in range(1, 4000):
-    if param == "s"
-        if any(filter is on):
-            total = total + 1 (or range size)
-    else
-        remaining_filters = [f for f in filters if filter is on with respect to param]
-        if len(remaining_filters) > 0:
-            next_param = ...
-            total = total + recursive call (remaining_filters, next_param)
-
+  Too slow!!!
 """
 
