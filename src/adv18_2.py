@@ -39,7 +39,7 @@ def get_instruction_day_1(line: str) -> Instruction:
 
 instructions = [get_instruction(line) for line in lines]
 #instructions = [get_instruction_day_1(line) for line in lines]
-print(instructions)
+#print(instructions)
 
 
 x_coord=0
@@ -64,24 +64,16 @@ for instr in instructions:
             assert(False)
     x_coords.append(x_coord)
     y_coords.append(y_coord)
-    #min_x = min(x, min_x)
-    #max_x = max(x, max_x)
-    #min_y = min(y, min_y)
-    #max_y = max(y, max_y)
-
-#max_x = max_x - min_x
-#max_y = max_y - min_y
 
 x_coords = list(set(x_coords)) #remove duplicates
 y_coords = list(set(y_coords)) #remove duplicates
 x_coords.sort()
 y_coords.sort()
 
-print(x_coords, y_coords)
+#print(x_coords, y_coords)
 tiles: list[list[TileStatus]] = [[TileStatus.UNKNOWN for _ in range(1, len(x_coords))] for _ in range(1, len(y_coords))]
 
 
-#################
 x_start_index = x_coords.index(0)
 y_start_index = y_coords.index(0)
 x_index = x_start_index
@@ -188,10 +180,7 @@ for instr in instructions:
 
 assert(x_coord==0)
 assert(y_coord==0)
-#assert(x_index==x_start_index)
-#assert(y_index==y_start_index)
 
-#################
 def status_to_char(status: TileStatus) -> str:
     match status:
         case TileStatus.UNKNOWN:
@@ -206,8 +195,8 @@ def print_tiles():
     for row in tiles:
         print("".join([status_to_char(s) for s in row]))
 
-print_tiles()
-print("------")
+#print_tiles()
+#print("------")
 
 dirty = True
 while dirty:
@@ -233,7 +222,7 @@ while dirty:
                     if neighbor_status == TileStatus.INSIDE or neighbor_status == TileStatus.OUTSIDE:
                         tiles[y][x] = neighbor_status
 
-print_tiles()
+#print_tiles()
 
 def get_tile_size(x_index:int, y_index:int) -> int:
     width  = x_coords[x_index + 1] - x_coords[x_index]
@@ -241,115 +230,8 @@ def get_tile_size(x_index:int, y_index:int) -> int:
     return width * height
 
 sum_inside_tiles = sum([sum([get_tile_size(x_index=x, y_index=y) if tiles[y][x] == TileStatus.INSIDE else 0 for x in range(len(x_coords)-1)]) for y in range(len(y_coords)-1)])
-print(orientation)
-print(sum_inside_tiles)
-print(extras)
+assert(orientation == 4) # assume clockwise
+#print(sum_inside_tiles)
+#print(extras)
 print(sum_inside_tiles + extras)
 
-# 124668364997497 is too high
-# some corners look odd in printout. More off-by-one bugs?
-#  only unnecessary OUTSIDE assignments? Harmless?
-# Something strange in floodfilled printout. Something is leaking?
-
-#################
-# 
-# off-by-one somewhere?
-#  We are supposed to go one step longer than the instruction distance every time !!?
-# how to deal with duplicate coordinates?
-# how to calculate tile size?
-# normalize to avoid negative coordinates?
-# tiles to be identified by coordinates of upper left corner?
-# "around the corner" setting of outside status (based on last_direction) not necessary?
-#################
-
-"""
-def instruction_to_command(instructions: list[Instruction], index: int) -> int:
-    
-    match instructions[index].direction:
-        case "R":
-            match instructions[index-1].direction:
-                case "D":
-                    multiplier = -1
-                case "U":
-                    multiplier = 1
-                case _:
-                    assert(False)        
-        case "L":
-            match instructions[index-1].direction:
-                case "D":
-                    multiplier = 1
-                case "U":
-                    multiplier = -1
-                case _:
-                    assert(False)
-        case "D":
-            match instructions[index-1].direction:
-                case "R":
-                    multiplier = 1
-                case "L":
-                    multiplier = -1
-                case _:
-                    assert(False)
-        case "U":
-            match instructions[index-1].direction:
-                case "R":
-                    multiplier = -1
-                case "L":
-                    multiplier = 1
-                case _:
-                    assert(False)
-        case _:
-            assert(False)
-    return instructions[index].distance * multiplier
-
-commands = [instruction_to_command(instructions=instructions, index=index) for index in range(len(instructions))]
-print(commands)
-"""
-
-#############
-"""
-Rewrite reading of values (use the hex code)
-Verify it's a loop
-Convert to sequence of LR instructions instead of orientation
-
-while not done:
-    identify RR:
-      reduce 0 and 2 by min(0 ,2)
-      add 1 * min(0, 2) to total
-    identify instructions with 0 distance
-      -1 = -1 + 1
-      remove 0 and 1
-
-while True:
-    identify LRR
-      if not found
-        break
-      reduce 0 and 2 by min(0 ,2)
-      add 1 * min(0, 2) to total
-
-cases:
-  0 < 2
-  2 < 0
-  -1 is L
-  -1 is R
-  3 is L
-  3 is R
-
-Assume LRR:
-0 < 2
-  -1 or 3 does not matter
-
-2 > 0
-  3 is L
-    still works
-  3 is R
-    ?
-
-----------
-with positive values for right turns:
-
-identify instructions with 0 distance
-      -1 = -1 - 1
-      0 = - 2
-      remove 1 and 2
-"""
